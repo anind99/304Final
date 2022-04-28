@@ -1,11 +1,12 @@
 ---
-title: "Socioeconomic determinants of Child Mortality Rate in Nepal"
+title: "Effect of Political Orientation on Altruistic Attitudes"
 author: Anindya Auveek
-subtitle: "https://github.com/anind99/SocioEconomicChildMortality"
+subtitle: "https://github.com/anind99/304Final"
 date: "`r format(Sys.time(), '%d %B %Y')`"
 output: pdf_document
 bibliography: references.bib
-abstract: The society we live in is not fair. The livelihood of humans depends on their socioeconomic circumstances. While advancement in science has reduced this gap in livelihood; there remains a stark contrast between those in higher and lower income classes. Health is a major aspect of livelihood and a key indicator of the health of a population is infant mortality rates. Studying this, the paper by Schell et al. (2007) found that socioeconomic factors can account for 92% of the variability in Infant Mortality Rates. Consequently, in this paper I explored the effect of socioeconomic factors on child mortality rates specifically within the country of Nepal. I hypothesized that the socioeconomic factors associated with higher income will lead to lesser mortality rates. The results confirmed by belief. Children with mother’s that have a secondary or higher level of education have lower mortality rates than children with mother that have no education. In addition, urban areas have lower child mortality rates than rural areas. However, the data I used was not sufficient to conduct an in-depth analysis. Future studies should use extensive data on the individual level to determine as many socioeconomic factors that are related to child mortality rates as possible.
+abstract: Altruism is the moral practice of helping others when they are in need. This may even include taking on a personal cost to do so. Having altruistic attitudes allowed humans to prosper over other organisms, and as a result societal norms have evolved to promote such stances. In modern democratic societies the political orientation of people determines the altruistic stance of society as a single entity. In this paper I explored whether political orientation could predict altruistic stance. In addition, I determined whether political philosophy could predict political orientation i.e., whether the party people vote for truly represents their social stances. My results confirmed the findings of previous papers, that political orientation and altruism are correlated. In addition, I determined that the current political system is not capable of representing the social philosophy of individuals. In order to implement the true attitudes of individuals a less binary system needs to be implemented.
+Key Words: Altruism, Political Orientation, Social Philosophy, Society, Evolution, Culture, Government 
 geometry: margin=1in
 fontfamily: mathpazo
 fontsize: 11pt
@@ -16,280 +17,516 @@ biblio-style: apsr
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r, message = FALSE, include=FALSE, error=FALSE, warning=FALSE}
-library(haven)
-library(tidyverse)
+```{r, message = FALSE, include=FALSE, error=FALSE}
+library(foreign)
+library(dplyr)
+library(MASS)
 library(ggplot2)
-library(reshape2)
 library(kableExtra)
+library(effects)
 ```
 
 
-# Introduction
 
-Throughout the last few centuries humanity has made leaps in scientific advancements. This has allowed society to develop into the productive and intricate system that we live in today. More importantly it has improved the quality of life for humans. Previously difficult to attain resources such as food, water, heat, and shelter are now readily available. However, one of the greatest impacts of scientific development for humans was medicinal advancement and its accessibility. We, as a society, have been able to move past previously devastating illness such as the plague and flu; ultimately increasing the human life span. 
-
-While the advancement of medicine has improved life in general for humans, unfortunately it has not had the same effect for everyone. Although a privileged individual may want to deny it, the society that we live in is unfair. For the purpose of increasing capital, countries and people have unequal living conditions. These unequal living conditions result in vastly different socioeconomic factors which in turn also effect the health of the population. Consequently, in this paper I will study the effect of socioeconomic factors in the mortality rate of children in Nepal. Nepal being a lower income country will allow us to predict distal socioeconomic factors that may affect individuals who lack financial security.
-
-In the paper by [@1], they have mentioned that for the purpose of reaching development goals, influential bodies advocate for resource allocation towards the health sector. They state that a major identifier of population health is Infant Mortality Rate (IMR). The WHO suggested that increased spending in the health sector will show a significant reduction in IMR. However other studies have found that socioeconomic progress (nutrition, housing, hygiene, education, gender equality, and human rights) are more important. Hence, in their paper [@1] set out to determine the impact of 5 specific socioeconomic variables (GNI/capita, poverty rate, income equality, young female illiteracy rate) on the variation of national IMR at the global level. While gross national income (GNI) predicts IMR, it doesn’t provide policy makers clear guidance on how to reduce mortality.
-
-The result of the finding show that 3 socioeconomic variables predicted 92% of the variation of national IMR the global level. Overall, as expected, GNI was the strongest determinant. However, this doesn’t provide direct reasons why infant mortality is caused. [@1] also found the young female illiteracy rate played a major part in the IMR of lower- and middle-income countries; most effective in the former. In addition, income distribution played a major part in middle income countries. High income countries showed no significant association between socio-economic factors and IMR; emphasizing the unjust fact that income is a major determinant of health. 
-
-Schell et al. (2007) concluded that contradictory to WHO’s statement, crude macro measurements such as public health spending do not have an independent effect on health gains. Specific factors such as female illiteracy contribute more to child survival. To extent this study, I used data collected by the ministry of health in Nepal [@D1] to determine the effect of socioeconomic factors on health specifically in Nepal. The data contains the mortality rate of children of different age groups and is aggregated by socioeconomic factors. I hypothesized that there will be a significant effect by socioeconomic variables on child mortality rates in Nepal. More specifically, socioeconomic factors associated with lower income will lead to higher child mortality.
-
-The results suggest that in Nepal there is indeed an inequality in mortality rate between children with different socioeconomic circumstances. While the data I used doesn’t capture many factors on an individual level, it provides an initial look on gap in health between people within Nepal. Being a lower income country, the findings from Nepal can also potentially be extrapolated to other countries who are in a similar economic position.
-
-
-# Data
-
-The data I used is collected by the Ministry of Health in Nepal (@D1). It was gathered through a two-step stratified sampling process. First, regions in Nepal were chosen based on if they were considered rural or urban. Secondly, within those regions, subdivisions were given probabilities proportional to their population size. Finally 25 households were chosen from each region. The table I analysed specifically is an aggregation of mortality of children in different age groups and socioeconomic circumstances. Further description of the data is available in the datasheet located in the appendix.
-
-The software I used to conduct analysis was R [@citeR] along with following packages: kableExtra [@p1], reshape2 [@p2], ggplot2 [@p3], tidyverse [@p4], and haven [@p5].
-
-```{r, message = FALSE, include=FALSE, error=FALSE, warning=FALSE}
-df <- readr::read_csv("/Users/aauveek/Documents/stats/304/SocioEconomicChildMortality/inputs/data/cleaned_data.csv")[-c(1)]
+```{r,message=FALSE, include=FALSE, error=FALSE}
+gss_data <- read.dta("/Users/aauveek/documents/stats/304/304Final/inputs/data/GSS_stata/GSS7218_R1.dta")
+gss_data1 <- dplyr::select(gss_data, helppoor, helpnot, helpsick, helpblk, othshelp, givblood, givhmlss, cutahead, volchrty, loanitem, careself, peoptrbl, selffrst, helpfrds, partyid, polviews, trdunion, goveqinc, govjobs, govunemp, govlazy, govcare, PRES16, PRES12, PRES08)
 ```
 
-## Important Variables
 
-* InfantAgeGroup: This captures the age group that the child has passed in. The data is inherently grouped by the ages of children. So this is an in important variable for context. 
+## Introduction
 
-* Urban: The mortality rates of children in urban regions.
+Altruism is the philosophy of helping others even when it may result in incurring a personal cost. It is behavior that has evolved in social organisms as it provided a survival advantage over non-social species. These non-altruistic species had more competition and less companions. It is arguable that us humans were able to beat the competition and become the dominant species in this world because of our social nature. Consequently, Altruism is a major part of the success of human species and society. 
 
-* Rural: The mortality rates of children in rural regions.
+In his paper, [@Article1] explained that along with our genes, culture has also evolved to take altruistic stances. Competition between groups selected for norms which were more beneficial for the survival of the group as a whole. For example, individuals who can be identified as “cheaters” are punished in various ways; including social criticism and even physical punishment. Vlerick didn’t stop at this, in his paper he explored a novel aspect of altruism; conscious decision making. Rather than hard-wired motions, intuition-based processes play a major part. This may even override the automatic, instinctual responses talked about previously. 
 
-The above 2 variables are important because they indirectly capture the socioeconomic differences between types of residence. For e.g., people urban regions may have better access to health care, and generally be wealthier than people in rural regions.
+Being such an important aspect of society, one may ask; how can these altruistic characteristics that we have developed further be emphasized? While humans individually may morally take the stance of helping others, society as a single entity (a system) does not always share this sentiment. Government policies dictate the opportunities people receive and ultimately decide the quality-of-life of less fortunate individuals. 
 
-* Primary: The Mortality rates of children whose mothers have graduated primary school.
+In order to explore this societal implementation of altruism, in this paper I will explore the effect of political orientation on altruistic attitudes. Given the assumption of a democratic government, the goal of my work will be to identify how the altruistic opinions of individuals can be accurately represented on a broader scale. This will be an expansion of the study previously conducted by [@Article2]; who also explored whether altruism is an important construct in political orientation even when controlling for personality factors. This is because while researchers had found the importance of personality on political orientation, the concept of altruism still remained to be explored.
 
-* Secondary+: The Mortality rates of children whose mothers have graduated secondary school or higher.
+Zettler and Hillbig (2009) confirmed their hypotheses; i) Individuals high in altruism will endorse a left-wing ideology. ii) Altruism explains unique variance in political orientation beyond personality (big six). 
 
-* No Education: The Mortality rates of children whose mothers have not graduated primary school.
+To follow the mentioned study, I will be exploring whether political orientation influences altruistic attitudes. More specifically, I will be analyzing the prototypical properties of both extreme political stances (left vs Right), to determine whether they can predict altruistic stances. In addition, I will confirm whether these prototypical properties are truly representative of people or are individuals forced to take an extreme stance due to the nature of the political system. 
 
-The above 3 variables indicate the literacy rate of the mothers of the children. This is an important socioeconomic factor related to MORTALITY RATES as discussed previously.
+In order to implement and validate this study will analyze data collected by the American Social Survey (NORC 2016) and select for two types of variables. The first being variables that capture altruistic attitudes, the second being variables associated with political orientation. To follow I will be analyzing the effect of dependent variables of political orientation on the independent variables of altruistic responses. Lastly, I will determine whether the variables of political ideology can independently determine orientation. Or whether our current political system is incapable of capturing the social stances of its subjects. I will use linear regression, ordinal logistic regression along with chi-squared tests to determine the significance of the relationships between these variables.
 
-* Mountain: The Mortality rates of children in the mountainous regions of Nepal.
 
-* Hill: The Mortality rates of children in the hilly regions of Nepal.
+## Data
 
-* Terai: The Mortality rates of children in the terai (flatland) regions of Nepal.
+The data I will be using in this survey is retrieved from the GSS database [@Data] and contains data  from the year 1972 to 2016. GSS is one of the longest running census surveys in the united states which collects attitudes towards social, political and cultural conditions. The data is collected from direct interviews conducted on american adults. The sampling is done in two steps, starting with a stratified sampling of an area based on it's population. Then randomly selecting individuals from these areas. Furthermore, isolating the research to Americans only reduces the variability in data due to country of residence. I could have chosen any other country to do this study on as well. The datasheet in the appendix contains additional information.
 
-The above 3 variables contain mortality rates grouped by different ecological regions specifically to Nepal. There are different socioeconomic circumstances (such as accessibility to health care, education or water) that may play a part in these regions and therefore these variables are important as well.
+The software I will be using for data analysis is R [@Software] coupled with the following packages: foreign [@pack1], dplyr [@pack2], MASS [@pack3], ggplot2 [@pack4], kableExtra [@pack5], effects [@pack6].
 
-* Eastern: The Mortality rates of children in the eastern regions of Nepal.
+Since I want to study the relationship between Altruism and Political Orientation, I will be identifying variables from the dataset that represent either the altruistic characteristic of an individual or their political views.
 
-* Central: The Mortality rates of children in the central regions of Nepal.
+```{r, message = FALSE,echo=FALSE, error=FALSE, warning=FALSE}
 
-* Western: The Mortality rates of children in the western regions of Nepal.
+# filter column values
 
-* Mid-western: The Mortality rates of children in the mid-western regions of Nepal.
+gss_data2 <- mutate(gss_data1, 
+                    givblood = ifelse(givblood == "More than once a week", 1, ifelse(givblood == "Once a week", 2, 
+                                                                                    ifelse(givblood == "Once a month", 3, 
+                                                                                           ifelse(givblood == "At least 2 or 3 times in the past year", 4, 
+                                                                                                  ifelse(givblood == "Once in the past year", 5, ifelse(givblood == "Not at all in the past year", 6, NA)))))),
+                                        givhmlss = ifelse(givhmlss == "More than once a week", 1, ifelse(givhmlss == "Once a week", 2, 
+                                                                                    ifelse(givhmlss == "Once a month", 3, 
+                                                                                           ifelse(givhmlss == "At least 2 or 3 times in the past year", 4, 
+                                                                                                  ifelse(givhmlss == "Once in the past year", 5, ifelse(givhmlss == "Not at all in the past year", 6, NA)))))),
+                    cutahead = ifelse(cutahead == "More than once a week", 1, ifelse(cutahead == "Once a week", 2, 
+                                                                                    ifelse(cutahead == "Once a month", 3, 
+                                                                                           ifelse(cutahead == "At least 2 or 3 times in the past year", 4, 
+                                                                                                  ifelse(cutahead == "Once in the past year", 5, ifelse(cutahead == "Not at all in the past year", 6, NA)))))),
+                    volchrty = ifelse(volchrty == "More than once a week", 1, ifelse(volchrty == "Once a week", 2, 
+                                                                                    ifelse(volchrty == "Once a month", 3, 
+                                                                                           ifelse(volchrty == "At least 2 or 3 times in the past year", 4, 
+                                                                                                  ifelse(volchrty == "Once in the past year", 5, ifelse(volchrty == "Not at all in the past year", 6, NA)))))),
+                    loanitem = ifelse(loanitem == "More than once a week", 1, ifelse(loanitem == "Once a week", 2, 
+                                                                                    ifelse(loanitem == "Once a month", 3, 
+                                                                                           ifelse(loanitem == "At least 2 or 3 times in the past year", 4, 
+                                                                                                  ifelse(loanitem == "Once in the past year", 5, ifelse(loanitem == "Not at all in the past year", 6, NA)))))),
+                                        careself = ifelse(careself == "Strongly Agree", 1, ifelse(careself == "Agree", 2, 
+                                                                                    ifelse(careself == "Neither Agree nor Disagree", 3, 
+                                                                                           ifelse(careself == "Disagree", 4, 
+                                                                                                  ifelse(careself == "Strongly Disagree", 5, NA))))),
+                    peoptrbl = ifelse(peoptrbl == "Strongly Agree", 1, ifelse(peoptrbl == "Agree", 2, 
+                                                                                    ifelse(peoptrbl == "Neither Agree nor Disagree", 3, 
+                                                                                           ifelse(peoptrbl == "Disagree", 4, 
+                                                                                                  ifelse(peoptrbl == "Strongly Disagree", 5, NA))))),
+                    helpfrds = ifelse(helpfrds == "Strongly Agree", 1, ifelse(helpfrds == "Agree", 2, 
+                                                                                    ifelse(helpfrds == "Neither Agree nor Disagree", 3, 
+                                                                                           ifelse(helpfrds == "Disagree", 4, 
+                                                                                                  ifelse(helpfrds == "Strongly Disagree", 5, NA))))),
+                    selffrst = ifelse(selffrst == "Strongly Agree", 1, ifelse(selffrst == "Agree", 2, 
+                                                                                    ifelse(selffrst == "Neither Agree nor Disagree", 3, 
+                                                                                           ifelse(selffrst == "Disagree", 4, 
+                                                                                                  ifelse(selffrst == "Strongly Disagree", 5, NA))))),
+                   othshelp = ifelse(othshelp == "Strongly Agree", 1, ifelse(othshelp == "Agree", 2, 
+                                                                                    ifelse(othshelp == "Neither Agree nor Disagree", 3, 
+                                                                                           ifelse(othshelp == "Disagree", 4, 
+                                                                                                  ifelse(othshelp == "Strongly Disagree", 5, NA))))),
+                   trdunion = ifelse(trdunion == "Strongly Agree", 1, ifelse(trdunion == "Agree", 2, 
+                                                                                    ifelse(trdunion == "Disagree", 3, 
+                                                                                           ifelse(trdunion == "Strongly Disagree", 4, NA)))),
+                   partyid = ifelse(partyid == "STRONG DEMOCRAT", 1, ifelse(partyid == "NOT STR DEMOCRAT", 2, 
+                                                                                    ifelse(partyid == "IND,NEAR DEM", 3, 
+                                                                                           ifelse(partyid == "independent", 4, ifelse(partyid == "IND,NEAR REP", 5, ifelse(partyid == "NOT STR REPUBLICAN", 6, ifelse(partyid == "STRONG REPUBLICAN", 7, ifelse(partyid == "OTHER PARTY", 8, NA)))))))),
+                   polviews = ifelse(polviews == "EXTREMELY LIBERAL", 1, ifelse(polviews == "liberal", 2, 
+                                                                                    ifelse(polviews == "SLIGHTLY LIBERAL", 3, 
+                                                                                           ifelse(polviews == "moderate", 4, ifelse(polviews == "SLGHTLY CONSERVATIVE", 5, ifelse(polviews == "conservative", 6, ifelse(polviews == "EXTRMLY CONSERVATIVE", 7, NA))))))),
+                   goveqinc = ifelse(goveqinc == "STRONGLY AGREE", 1, ifelse(goveqinc == "agree", 2, 
+                                                                                    ifelse(goveqinc == "disagree", 4, 
+                                                                                           ifelse(goveqinc == "STRONGLY DISAGREE", 5, 
+                                                                                                  ifelse(goveqinc == "neither", 3, NA))))),
+                  govcare = ifelse(govcare == "ON RIGHT TRACK", 1, ifelse(govcare == "TOO MUCH CARE", 2, NA)),
+                  govlazy = ifelse(govlazy == "Strongly Agree", 1, ifelse(govlazy == "Agree", 2, 
+                                                                                    ifelse(govlazy == "Neither Agree nor Disagree", 3, 
+                                                                                           ifelse(govlazy == "Disagree", 4, 
+                                                                                                  ifelse(govlazy == "Strongly Disagree", 5, NA))))),
+                  govunemp = ifelse(govunemp == "STRONGLY AGREE", 1, ifelse(govunemp == "agree", 2, 
+                                                                                    ifelse(govunemp == "disagree", 4, 
+                                                                                           ifelse(govunemp == "STRONGLY DISAGREE", 5, 
+                                                                                                  ifelse(govunemp == "neither", 3, NA))))),
+                  govjobs = ifelse(govjobs == "STRONGLY AGREE", 1, ifelse(govjobs == "agree", 2, 
+                                                                                    ifelse(govjobs == "disagree", 4, 
+                                                                                           ifelse(govjobs == "STRONGLY DISAGREE", 5, 
+                                                                                                  ifelse(govjobs == "neither", 3, NA)))))
+)
+                  
 
-* Far.western: The Mortality rates of children in the far-western regions of Nepal.
+gss_data2 <- mutate(gss_data2, binary_orientation = ifelse(PRES16 == "Trump" | PRES12 == "Romney" | PRES08 == "McCain", 1, ifelse(PRES16 == "Clinton" | PRES12 == "Obama" | PRES08 == "Obama", 0, NA)))
 
-The above 5 variables contain mortality rates grouped by different geographical regions specifically to Nepal. There are different socioeconomic circumstances (such as the income and education) that may be different in between regions and therefore these variables are important as well.
 
-* No antenatal or delivery care: The mortality rates of children who have received no antenatal or delivery care.
+```
 
-* Either antenatal or delivery care: The mortality rates of children who have received either antenatal or delivery care.
 
-* Both antenatal and delivery care: The mortality rates of children who have received both antenatal and delivery care.
+### Variables that capture Altruistic Characteristics
 
-The above 2 variables are directly associated with infant health, but the data is incomplete for these. Therefore, we will not be analysing these for this study.
+* othshelp: People should help less fortunate others. (1 - Strongly agree,  5 - Strongly disagree)
+* givblood: Donated blood during the past 12 months (1 - Highest Frequency, 6 - Lowest Frequency)
+* givhmlss: Given food or money to a homeless person (1 - Highest Frequency, 6 - Lowest Frequency)
+* volchrty: Done volunteer work for a charity (1 - Highest Frequency, 6 - Lowest Frequency)
+* loanitem: Has let someone borrow a item of some value (1 - Highest Frequency, 6 - Lowest Frequency)
+* careself: Those in need have to take care of themselves (1 - Highly agree, 6 - Highly Disagree)
+* peoptrbl: Assisting people in trouble is very important (1 - Highly agree, 6 - Highly Disagree)
+* selffrst: People need not overly worry about others (1 - Highly agree, 6 - Highly Disagree)
+* helpfrds: Should better off ppl help less well-off friend (1 - Highly agree, 6 - Highly Disagree) 
 
-To follow, I will be providing the mean mortality rates of the different variables along with the comparison of variables with each other. 
+The above 9 variables related to altruistic attitides for an individual. They all consist of a scenario where a person has the choice of helping someone as opposed to not. 
 
-```{r, message = FALSE, echo=FALSE, error=FALSE, warning=FALSE}
-mean_selected <- df[-c(1)]
-MeanMortality <- vector(mode = "character", length = ncol(mean_selected))
-SocioEconomicGroup <- vector(mode = "character", length = ncol(mean_selected))
+#### Variables that capture an individuals political orientation
+
+The following variables represent an individuals political views
+
+* partyid: Political party affiliation (1 - Strong Democrat, 6 - Strong Republican, 7 - Other)
+* polviews: Think of self as liberal or conservative (1 - Extremely Liberal, 7 - Extremely Conservative)
+* binary_orientation: This variable is generated from PRES08, PRES12 and PRES16 and represents the voted party of an individual (0 - Democrat, 1 - Republican)
+
+The above 3 variables directly represent the political views of an individual, i.e their affliation to conservative or liberal.
+
+* trdunion: Workers need strong trade unions (1 - Strongly Agree, 4 - Strongly Disagree)
+* goveqinc: The Government should reduce income differences (1 - strong agree, 5 - strong disagree).
+* govjobs: The government should provide a job for everyone who wants one. (1 - strong agree, 5 - strong disagree).
+* govunemp: The government should provide a decent standard of living for the unemployed. (1 - strong agree, 5 - strong disagree).
+* govlazy: The social benefits from the government make people lazy. (1 - strong agree, 5 - strong disagree).
+* govcare: The government should be about the social welfare of people (1 - strong agree, 5 - strong disagree).
+* helppoor: The Government should take care of people (1 - strong agree, 5 - strong disagree). 
+* helpnot: The Government doing too much or should do more to help people (1 - strong agree, 5 - strong disagree). 
+* helpsick: The Government should help in paying hospital bills vs not paying them (1 - strong agree, 5 - strong disagree). 
+* helpblk: The Government should be helping imprve living standards of black people (1 - strong agree, 5 - strong disagree). 
+* ldctax. Wealth countries pay taxes to aid less wealthier ones (1 - strong agree, 5 - strong disagree). 
+
+The above 7 variables represent an individuals opinion on government policies related to social aid. The opinions on these policies should differ based on a person's political views and therefore they can be categorized as a political variable.
+
+The categorical scaling of the majority of these variables have been mutated from written answers into numerical factors in order to make the analysis more convenient. To start exploring the nature of these variables, it may be beneficial to look at their mean and distributions. The tables below represent this information.
+
+```{r, message = FALSE,echo=FALSE, error=FALSE, warning=FALSE}
+
+
+Attribute_Name <- vector(mode = "character", length = ncol(gss_data2))
+Mean <- vector(mode = "character", length = ncol(gss_data2))
+Standard_Deviation <- vector(mode = "character", length = ncol(gss_data2))
+
 count <- 1
-for (i in colnames(mean_selected)){
-  MeanMortality[count] <- signif(mean(as.numeric(unlist(na.omit(mean_selected[i])))), 3)
-  SocioEconomicGroup[count] <- i
-  count <- count + 1
-}
-mean_table <- data.frame(SocioEconomicGroup, MeanMortality)
 
-knitr::kable(mean_table, caption = "Mean Mortality Rates of Selected Socio-economic Groupings") %>%
-  kable_styling(latex_options="scale_down")
+for (i in colnames(gss_data2)){
+   Mean[count] <- signif(mean(as.numeric(unlist(na.omit(gss_data2[i])))), 3)
+   Standard_Deviation[count] <- signif(sd(as.numeric(unlist(na.omit(gss_data2[i])))),3)
+   Attribute_Name[count] <- i
+   count <- count + 1
+}
+
+
+mean_sd_table <- data.frame(Attribute_Name, Mean, Standard_Deviation)
+
+knitr::kable(mean_sd_table, caption = "Means and Standard Deviations of Selected Variables") %>%
+  kable_styling(font_size = 10, latex_options="scale_down")
+  
+
+
 ```
 
+Table 1 contains the mean and distribution of each of the select variables. From quick glance we can see that the mean is mostly at neutral values (towards the middle). However, since most of these variables are categorical, the standard deviation does not give us an idea of their distribution. Therefore, I present the distribution of the categorical variables as relative frequency. 
+
+```{r, message = FALSE,echo=FALSE, error=FALSE, warning=FALSE}
+
+counts_table <- data.frame(Attribute = character(ncol(gss_data2)), b = character(ncol(gss_data2)), c = character(ncol(gss_data2)),
+                           d = character(ncol(gss_data2)), e = character(ncol(gss_data2)), f = character(ncol(gss_data2)),
+                           g = character(ncol(gss_data2)), h = character(ncol(gss_data2)), i = character(ncol(gss_data2)))
 
 
-Table 1 contains the mean child mortality rates for each variable. We can see at glance that there are indeed differences in mortality rates between types of residence, ecological regions, and geographical regions:  
+for (i in seq(1,ncol(gss_data2))){
+  atr <- colnames(gss_data2)[i]
+  if (atr != "coninc"){
+    cts <- table(gss_data2[,i])
+    for (j in seq(1,length(cts))){
+      counts_table[i, j+1] <- signif(as.numeric(cts[j])/sum(cts), 5)
+    }
+    counts_table[i, 1] <- atr
+  }
+}
 
-* Urban regions have lower mortality than rural ones. 
-*	Children whose mothers have a higher level of education have lower mortality rates.
-*	Hilly regions have lower mortality than Terai regions, who have lower mortality than mountainous regions.
-*	The mortality of geographical regions is ascending in this order: Eastern, Western, Central, Mid-Western, Far Western. 
+colnames(counts_table) <- c("AttributeName", "1", "2", "3", "4", "5", "6", "7", "8")
 
-Whether these differences are only in the mean mortality rate or for all age groups must be analysed further. Supplementing the mean table, I will be displaying the distribution of mortality rates by age group of the variables in comparison with each other.
+knitr::kable(counts_table, caption = "Independant Variable Frequencies") %>%
+  kable_styling(latex_options="scale_down")
 
-```{r, message = FALSE, echo=FALSE, error=FALSE, warning=FALSE}
-selected_df <- select(df, Urban, Rural, InfantAgeGroup)
-df3 <- melt(selected_df, id.vars='InfantAgeGroup')
-ggplot(df3, aes(x=InfantAgeGroup, y=value, fill=variable)) +
-  geom_bar(stat='identity', position='dodge') + scale_x_discrete(guide = guide_axis(n.dodge=3)) + ggtitle("Plot 1: Mortality Rates of children by Residence Type") + guides(fill=guide_legend(title="Residence")) + ylab("Mortality Rate (Death per 1000)") 
 
-selected_df <- select(df, "Primary", "Secondary+", "No Education", "InfantAgeGroup")
-df3 <- melt(selected_df, id.vars='InfantAgeGroup')
-ggplot(df3, aes(x=InfantAgeGroup, y=value, fill=variable)) +
-  geom_bar(stat='identity', position='dodge') + scale_x_discrete(guide = guide_axis(n.dodge=3)) + guides(fill=guide_legend(title="Education")) + ylab("Mortality Rate (Death per 1000)") + ggtitle("Plot 2: Mortality Rates of children by Education Level")
+```
 
-selected_df <- select(df,  "Mountain" ,"Hill", "Terai", "InfantAgeGroup")
-df3 <- melt(selected_df, id.vars='InfantAgeGroup')
-ggplot(df3, aes(x=InfantAgeGroup, y=value, fill=variable)) +
-  geom_bar(stat='identity', position='dodge') + scale_x_discrete(guide = guide_axis(n.dodge=3)) + guides(fill=guide_legend(title="Ecological Region")) + ylab("Mortality Rate (Death per 1000)") + ggtitle("Plot 3: Mortality Rates of children by Ecologicial Region")
+All the above categorical variables are on maximum at a 8-point scale. Therefore a single table (Table 2) is suitable for visualizing their frequency counts. An interesting finding is that people usually are hesitant to answer at extreme values for opinion related questions. Most of the time the middle value is the answer with the highest frequency. 
 
-selected_df <- select(df, "Eastern","Central","Western","Mid-western","Far.western","InfantAgeGroup")
-df3 <- melt(selected_df, id.vars='InfantAgeGroup')
-ggplot(df3, aes(x=InfantAgeGroup, y=value, fill=variable)) +
-  geom_bar(stat='identity', position='dodge') + scale_x_discrete(guide = guide_axis(n.dodge=3)) + guides(fill=guide_legend(title="Geographical Region")) + ylab("Mortality Rate (Death per 1000)") + ggtitle("Plot 4: Mortality Rates of children by Geographical Region")
+The following variables are significantly right skewed: Othshlp, Careself, Peoptrbl, Helpfrds. This tells us that while people generally tend to be altruistic (prone to helping others) they still value self-importance (Careself).
 
+In order to get a better understanding of the nature of the altruistic variables in relation to political orientation, it may be beneficial to look at their grouped means. Similarly, it will be beneficial to look at the means of the political opinion variables grouped by the variable "polviews"; allowing us to numerically estimate the cumulative opinion of each group.
+
+
+```{r, message = FALSE,echo=FALSE, error=FALSE, warning=FALSE}
+
+
+
+Altruism_by_groups <- gss_data2 %>% 
+  group_by(polviews) %>% summarise(
+  othshelp = mean(as.numeric(na.omit(othshelp))),
+  givblood = mean(as.numeric(na.omit(givblood))),
+  givhmlss = mean(as.numeric(na.omit(givhmlss))),
+  cutahead = mean(as.numeric(na.omit(cutahead))),
+  volchrty = mean(as.numeric(na.omit(volchrty))),
+  loanitem = mean(as.numeric(na.omit(loanitem))), 
+  careself = mean(as.numeric(na.omit(careself))),
+  peoptrbl = mean(as.numeric(na.omit(peoptrbl))), 
+  selffrst = mean(as.numeric(na.omit(selffrst))), 
+  helpfrds = mean(as.numeric(na.omit(helpfrds))), 
+  partyid = mean(as.numeric(na.omit(partyid))), 
+  polviews = mean(as.numeric(na.omit(polviews))),
+  trdunion = mean(as.numeric(na.omit(trdunion)))
+)
+
+knitr::kable(Altruism_by_groups, caption = "Mean Altruistic Characteristic Scores by Polviews") %>%
+  kable_styling(latex_options="scale_down")
+
+
+Policy_by_groups <- gss_data2 %>% 
+  group_by(polviews) %>% summarise(
+  helppoor = mean(as.numeric(na.omit(helppoor))),
+  helpnot = mean(as.numeric(na.omit(helpnot))),
+  helpsick = mean(as.numeric(na.omit(helpsick))),
+  helpblk = mean(as.numeric(na.omit(helpblk))),
+  trdunion = mean(as.numeric(na.omit(trdunion))),
+  goveqinc = mean(as.numeric(na.omit(goveqinc))), 
+  govjobs = mean(as.numeric(na.omit(govjobs))), 
+  govunemp = mean(as.numeric(na.omit(govunemp))), 
+  govlazy = mean(as.numeric(na.omit(govlazy))), 
+  govcare = mean(as.numeric(na.omit(govcare)))
+  
+)
+
+knitr::kable(Policy_by_groups, caption = "Mean Government Socio-Political Opinions by Polviews") %>%
+  kable_styling(latex_options="scale_down")
   
 ```
 
+Table 3 provides the mean altruistic scores, grouped by the "polviews" variable. The interesting finding from this table is that typically the more right leaning a group is the higher their score on each altruistic variable. This is what we would expect according to the hypothesis.
 
-### Plot 1
+Table 4 provides the mean political opinion scores, grouped by the "polviews" variable. Here we see that typically the more conservative a group is the higher their score on each political opinion variable (opposite for govlazy). This makes sense because the opinions represented in these variables are constructed on agreeability regarding various social benefits. According to the definitions of each political orientation, it would be expected for right leaning groups to be more individualistic and left-leaning groups to support social welfare.
 
-Plot 1 shows the mortality rate of different age groups by residence type. We can see that in most age groups the MORTALITY RATE in rural regions is higher. However, the mortality rate of the “under 5” age group is significantly higher in urban regions. This is an outlier.
+However, these findings can be slightly misleading since the grouped means aren't calculated from the same individuals. This is because some of these variables were calculated in years that others were not (i.e some variables have null values where other variables are present).
 
-### Plot 2
+\hfill \break 
 
-Plot 2 shows the mortality rate of different age groups by the mother’s education level. We can see that for the lower age groups, MORTALITY RATE is lowest if their mothers have a secondary or higher level of education. However interestingly, this is not found for children in higher age groups. Children who have mothers with “no education” surprisingly have the lowest mortality rates if they are in the under 5 age group.
+After looking at these mean responses, it would also be beneficial to analyze the distribution of the grouped altruistic responses. So, to visualize these I present box plots. (see appendix Plots 1 - 10)
 
-### Plot 3
+#### Plot 1, 2, 4, 5, 6, 7, 8, 9: othshelp, givblood, givhmlss, cutahead, volchrty, loanitem, careself, peoptrbl, selffrst, helpfrds by polviews 
 
-Plot 3 shows the mortality rate of different age groups by Ecological Region. We see that there are no generalizable differences in the MORTALITY RATEs of age groups grouped by their ecological region.  Overall mountainous regions seem to have the highest, however for the “infant” age group, it has the lowest mortality rates. 
+These variables do not show a difference in distribution based on political views.
 
-### Plot 4
+#### Plot 3, 10: givhmlss, helpfrd by polviews:
 
-Plot 4 shows the mortality rate of different age groups by Geographical Region. We can see that in general eastern, western, and central regions have lower mortality rates than mid-western and far-western regions. However surprisingly for the infant age group, they have a higher rate. This is similar finding to the grouping by ecological region and may be due to the same factors.
+Both givhmlss and helpfrd are more right skew for more left leaning groups. This indicates that the more liberal an individual the more they are prone to both helping the homeless and friends (i.e more altruistic by definition). 
 
-After looking at these distributions of mortality rates by age groups and comparing the socioeconomic variables, we must determine whether these differences are significant. I will be conducting statistical tests to determine the sigificance of these findings.
+Initially looking at the relationships provided us an initial idea of their relationships. Nevertheless, in order to delve into these relationships more deeply, I will now be analyzing them quantitatively using statistically models.
 
-# Results
+## Results
 
-To identify the statistically significant effect of socioeconomic factors on mortality rates I will be conducting t-tests between the variables. Since the data is limited, I will be using one-sided tails with a significance level of 90% to determine if the mortality rate of one variable is lower or higher than another. A p-value of less than 0.1 will contradict the null hypothesis and confirm the alternate hypothesis that 1 variable has a higher mortality rate than another. 
+My analysis will be conducted in 2 parts, addressing both of the research goals driving this study. The first goal is to determine whether left-wing political ideologists are more altruistic than right-wing. The second, to investigate the correlation between stances on different socio-political matters and political views. This latter investigation will include the conclusion which identifies the effectiveness of a 2-party system in representing the political opinions of an individual.
 
-```{r, message = FALSE, echo=FALSE, error=FALSE, warning=FALSE}
-ttest_df <- data.frame(matrix(ncol = 4, nrow = 0))
-colnames(ttest_df) <- c("X1", "X2", "Type", "P-Value")
-# T tests 
+### Part A
 
-ttest1 <- t.test(as.numeric(df$Urban), as.numeric(df$Rural), alternative='less')
-ttest_df[1, ] <- c("Urban", "Rural", "Less", signif(ttest1$p.value, 3))
+To start I will be analyzing the impact of "Polviews" on altruistic attitudes. An appropriate analysis to determine the dependence between two categorical variables is the chi squared test. Therefore I provided a table containing the p-values of chi-squared t-tests of between each of the altruistic variable and "Polviews" (using a significance level of 5%). 
 
-ttest2 <- t.test(as.numeric(df$Mountain), as.numeric(df$Hill), alternative='greater')
-ttest_df[2, ] <- c("Mountain", "Hill", "Greater", signif(ttest2$p.value, 3))
+```{r, message = FALSE,echo=FALSE, error=FALSE, warning=FALSE}
 
-ttest3 <- t.test(as.numeric(df$Mountain), as.numeric(df$Terai), alternative='greater')
-ttest_df[3, ] <- c("Mountain", "Terai", "Greater", signif(ttest3$p.value, 3))
+Altruistic_cols <- c("othshelp", "givblood", "givhmlss", "cutahead", "volchrty", "loanitem", "careself", "peoptrbl", "selffrst", "helpfrds")
+Chisq_table <- data.frame(matrix(ncol = length(Altruistic_cols) + 1, nrow = 1))
+colnames(Chisq_table) <- c("", Altruistic_cols)
 
-ttest4 <- t.test(as.numeric(df$Hill), as.numeric(df$Terai), alternative='less')
-ttest_df[4, ] <- c("Hill", "Terai", "Less", signif(ttest4$p.value, 3))
+Chisq_table[1,1] <- "P-Val"
+for (j in seq(1, length(Altruistic_cols))){
+  temp_df <- na.omit(dplyr::select(gss_data2, "polviews", Altruistic_cols[j]))
+  if (nrow(temp_df) > 500){
+    pval <- chisq.test(temp_df[,1], temp_df[,2])$p.value
+    if (pval < 0.05){
+      Chisq_table[1, j+1] <- signif(pval, 2)
+    } else {
+      Chisq_table[1, j+1] <- "> 0.05"
+    }
+  }
+}
 
-ttest5 <- t.test(as.numeric(df$Primary), as.numeric(df$`No Education`), alternative='less')
-ttest_df[5, ] <- c("Primary", "No Education", "Less", signif(ttest5$p.value, 3))
-
-ttest6 <- t.test(as.numeric(df$`Secondary+`), as.numeric(df$`No Education`), alternative='less')
-ttest_df[6, ] <- c("Secondary +", "No Education", "Less", signif(ttest6$p.value, 3))
-
-ttest7 <- t.test(as.numeric(df$`Secondary+`), as.numeric(df$Primary), alternative='less')
-ttest_df[7, ] <- c("Secondary +", "Primary", "Less", signif(ttest7$p.value, 3))
-
-ttest8 <- t.test(as.numeric(df$Eastern), as.numeric(df$Western), alternative='less')
-ttest_df[8, ] <- c("Eastern", "Western", "Less", signif(ttest8$p.value, 3))
-
-ttest9 <- t.test(as.numeric(df$Eastern), as.numeric(df$Central), alternative='less')
-ttest_df[9, ] <- c("Eastern", "Central", "Less", signif(ttest9$p.value, 3))
-
-ttest10 <- t.test(as.numeric(df$Eastern), as.numeric(df$`Mid-western`), alternative='less')
-ttest_df[10, ] <- c("Eastern", "Mid Western", "Less", signif(ttest10$p.value, 3))
-
-ttest11 <- t.test(as.numeric(df$Eastern), as.numeric(df$Far.western), alternative='less')
-ttest_df[11, ] <- c("Eastern", "Far Western", "Less", signif(ttest11$p.value, 3))
-
-ttest12 <- t.test(as.numeric(df$Western), as.numeric(df$Central), alternative='less')
-ttest_df[12, ] <- c("Western", "Central", "Less", signif(ttest12$p.value, 3))
-
-ttest13 <- t.test(as.numeric(df$Western), as.numeric(df$`Mid-western`), alternative='less')
-ttest_df[13, ] <- c("Western", "Mid Western", "Less", signif(ttest13$p.value, 3))
-
-ttest14 <- t.test(as.numeric(df$Western), as.numeric(df$Far.western), alternative='less')
-ttest_df[14, ] <- c("Western", "Far Western", "Less", signif(ttest14$p.value, 3))
-
-ttest15 <- t.test(as.numeric(df$Central), as.numeric(df$`Mid-western`), alternative='less')
-ttest_df[15, ] <- c("Central", "Mid Western", "Less", signif(ttest15$p.value, 3))
-
-ttest16 <- t.test(as.numeric(df$Central), as.numeric(df$Far.western), alternative='less')
-ttest_df[16, ] <- c("Central", "Far Western", "Less", signif(ttest16$p.value, 3))
-
-ttest17 <- t.test(as.numeric(df$`Mid-western`), as.numeric(df$Far.western), alternative='less')
-ttest_df[17, ] <- c("Mid Western", "Far Western", "Less", signif(ttest17$p.value, 3))
-
-knitr::kable(ttest_df, caption = "T-Test of Mortality Rates by Socioeconomic Factors") %>%
+knitr::kable(Chisq_table, caption = "P Value of Chi Square Test Comparing Altruistic Variables and Political Orientation") %>%
   kable_styling(latex_options="scale_down")
+  
 ```
 
-Table 2 contains the results of these tests. The interpretation of the data in the table is as following:
+From Table 5:
 
-*	Null Hypothesis: There are no differences between the mortality rates X1 and X2 by age group. 
-*	Alternate Hypothesis: The mortality rates of X1 is different than X2 by Type (Less or Greater).
-*	If P-Value is less than 0.1, then we accept the alternate hypothesis. 
+    * Helping others (helpfrds, peoptrbl), giving to the homeless, volunteering in charity, self-importance (selffrst, careself) are all concepts that have a significant relationship with political orientation.
+    * Donating blood, loaning items, and allowing others to cut ahead in line do not have a significant relationship.
 
-### Mothers Education Level
+As I hypothesized and also observed in the initial data observation, most altruistic attitudes do correlate with political orientation. A potential reason that 3 of the variables are not related may be because these variables aren't derived from ideology but rather personal circumstance. For example, the amount times an individual donates blood in a year depends on their health and general convenience factors. 
 
-1. We see that the mortality rates of children with mothers that have an education level of secondary or higher is significantly lower than the mortality rates or children with mothers that have no education. 
-2. However, there is no significant differences in the mortality rates of other education levels. It is important to note that this may be due to the lack of data as the p-values are still close to 0.1.
+Having observed these relationships, we must still determine the extent and nature of their correlations. To supplement this analysis I will use ordinal logistic regression to calculate the correlations. This is an appropriate model because the dependent variable "Polviews" is categorical with more than 2 levels.
 
-### Type of Residence
+Here is formula for my ordinal logistic regression model:
 
-We see that mortality rates in Urban residences are significantly lower than mortality rates in rural residences. These indicate the socioeconomic differences between rural and urban regions result in a health advantage for people living in the latter. 
+$l o g i t ( P ( Y <= j ) ) = B_{j0} + B_{j1} x_1$ ; where $l o g i t ( P ( Y <= j ) ) = log \frac{P ( Y <= j )}{P ( Y > j )}$
 
-### Ecological Region
+Y represents an altruistic variable, X represents Polviews, and j represents a specific value of X.
 
-1.There are no significant differences in mortality rates between ecological regions.
-2.However, it is important to note that this may be due to lack of individual data, as the p-values of mountainous vs hill and terai are close to 0.1. The mortality rates of mountainous regions may indeed be higher due to socioeconomic factors.
+Table 5 that contains the beta coefficient of these models comparing each of the altruism variables with the quality of life attributes. The models where the relationship was not significant (according to chi-squared) contains a "p > 0.05" marker.
 
-### Geographical Region
 
-1. There are no significant differences in mortality rates between geographical regions. 
-2. However, it is important to note that this may be due to lack of individual data, as the p-values of Eastern and Western vs Mid-western and Far-western are close to 0.1. The mortality rates of Mid-Western and Far-Western regions may indeed be higher due to socioeconomic factors.
+```{r, message = FALSE,echo=FALSE, error=FALSE, warning=FALSE}
+Log_reg_table <- data.frame(matrix(ncol = length(Altruistic_cols) + 1, 1))
+colnames(Log_reg_table) <- c("",Altruistic_cols)
 
-# Discussion
+Log_reg_table[1,1] <- "Coefficient"
+for (j in seq(1, length(Altruistic_cols))){
+  temp_df <- na.omit(dplyr::select(gss_data2, "polviews", Altruistic_cols[j]))
+  colnames(temp_df) <- c("a", "b")
+  if (nrow(temp_df) > 500){
+    pval <- chisq.test(temp_df[,1], temp_df[,2])$p.value
+    if (pval < 0.05){
+      temp_model <- polr(as.factor(a) ~ b, data = temp_df)
+      Log_reg_table[1, j+1] <- signif(as.numeric(temp_model$coefficients), 3)
+    } else {
+      Log_reg_table[1, j+1] <- "P > 0.05"
+    }
+  }
+}
 
-The society that we live in is not fair. Humans who are born into a life of socioeconomic privilege are much more equipped to succeed in life than humans who are not. The scientific advancements made in medicine closed some these gaps in livelihood between different socioeconomic groups. One specific benefit from these advancement over the last century was the steady reduction of infant mortality rates. However there still remains a large gap between higher and lower income countries. 
+knitr::kable(Log_reg_table, caption = "Coefficient of Logistic Regression of Altruistic Variables and Polviews") %>%
+  kable_styling(latex_options="scale_down")
+  
+```
+It may be difficult to realize what the numbers in the table represent. Here is an interpretation of coefficients provided:
 
-In the paper by [@1] they have found that 3 socioeconomic variables predicted 92% of the variation of national IMR at the global level. These factors are GNI, Income Distribution and Female Illiteracy Rates. In lower- and middle-income countries specifically, they found that Female Illiteracy Rates and Income Distribution played the biggest part in IMR. Suggesting that these socioeconomic factors are either direct- or indirect- causally responsibly for IMRs. They concluded that policy makers should focus on causes like these on the micro level to improve the general health of the nation.
+Let B be the logistic regression coeffcient of model (in Table 5) where Y represents an altruistic variable and X represents a quality of life attribute. With 1 point increase in X, the logit of Y (log of the odds of Y = y as opposed to another value) increases by B amount. In terms of odds, the odds of Y being a specific number is multiplied by exp(B) when X increases by 1. 
 
-To extend the previous study, in this paper I explored the effect of socioeconomic factors on child mortality rates within the country of Nepal. Nepal being a lower income country itself can provide insight into the aspects of child mortality in other lower income countries as well. My hypothesis in the study was that socio-economic factors will indeed influence child mortality in Nepal. Specifically, following the results of the study by [@1], I predicted that socio-economic circumstances related to higher income will lead to lower child mortality rates. For example, the education level of the mothers of children will have a significant impact on child mortality. 
+Evident from this table the correlation between the variables aren't very extreme. Interpreting the relationship between othshelp and polviews; the logit of othshelp increases by 0.147 points when the polviews score of the individual increases by 1. Exp(0.147) is 1.16. In other words, the odds of the individual disagreeing that the government should be helping poor people decreases by 16% when their happiness score increases by 1.
 
-In order to conduct this study, I used data collected by the Nepal ministry of health in 1996 [@D1] and created a dataset containing the mortality rates grouped by different socio-economic variables. 
+To better visualize the correlations, I plotted the relevant models. (see appendix)
 
-I began the analysis by looking at the mean child mortality rates of different socioeconomic variables. These means are essentially capturing the weighted average of child mortality rates; with each age group being give the same weight. Therefore, they do not represent the actual population means. 
+#### As seen from plots 11-17 (appendix), here are some interesting findings:
 
-Several interesting findings can be seen from these means. Aligning with my hypothesis, the higher the education level of the mother, the lower the mortality rate (i.e., Secondary+ < Primary < No Education). In addition, urban regions also have a lower mean child mortality rate than rural ones. This also aligns with my hypothesis since urban regions generally have a higher income than rural ones. Lastly, different geographical and ecological regions also had different mortality. Although it cannot be conclusively said whether this aligns with my hypothesis, the income distribution in these regions may be different from each other. Thus, resulting in different socioeconomic factors which affect child mortality.
+* Othshlp: For Y = 1. the probability of being more right-wing oriented decreases.
 
-Probing deeper into the relationship between the variables, I plotted the distribution mortality rate of different age groups in a bar graph that compares groups of variables. 
+* Givhmlss: For Y = 6, the probability of being more right-wing increases
 
-The first group being residence type. The plot shows that urban regions do indeed have a lower mortality rate than rural regions almost all age groups, aligning with my hypothesis. However, the mortality rate in the “under 5” age group is significantly higher in urban regions. This may be due to non-socioeconomic factors. The general reasons which lead to child mortality for lower ages may not apply to higher age groups. The second grouping of variables I plotted were the mother’s education level. As hypothesized, children with mothers who have a higher education level have lower mortality rates. However, like the finding in the residence type plot, the higher age group of “under 5” do not share the finding. 
+* Careself: For low Y values, the probability of being more right wing increase, while the opposite happens for high Y values.
 
-The other two grouping of variables I plotted were ecological region and geographical region. In these groupings I could not see any significant differences of child mortality rates. For example, overall mountainous regions seem to have the highest mortality rates, however for the infant age group they have the lowest.  
+* Selffirst: For Y = 2, the probability of being more right wing increases, while for Y = 4, it decreases.
 
-While simply looking at the differences in mortality rates between different socioeconomic variables provided me an initial insight. It did not allow me to make any conclusions. Therefore, to determine whether the actual differences between the groupings of variables were significant, I conducted pearson's t-tests. 
 
-The findings for the t-tests of the mother’s education level show that mothers who have a secondary or higher level of education have significantly lower child mortality rates than mothers with no education. However, no significant findings were shown between primary level of education and no education.  The confirmation of the hypothesis can be explained through various attributes related to having a higher education. Indirectly, if you have a higher level of education, you are more likely to be in a higher economic group. Thus, having better access to medicine and other direct preventers of child mortality. The latter lack of finding (primary and no education) may be due to the limitation of the data; the table only contains grouped information and consists of only 5 rows.
+### Part B
 
-To add, the findings for the t-tests of the type of residence show that urban residences do have significantly lower child mortality rates than rural residences, aligning with my hypothesis. As previously mentioned, this may be due to the socioeconomic differences between urban and rural regions. However, a plethora of other socioeconomic factors not available in this dataset may also be responsible for this difference. 
+Secondly, I will investigate the relationship between opinons on various Socio-Political matters and "Polviews". This will include the analysis determining the effectiveness of a two-party system in representing these opinions.
 
-Lastly, the findings for the t-tests of the ecological and geographical regions do not show any significant results; contradictory to my hypothesis. Nevertheless, this can also be attributed as a limitation of the dataset. Since the data does not contain enough records, and is not on the individual level, t-tests will not be able to capture the true distribution of the variables. Therefore, we cannot conclude whether the lack of findings is true.
+Similar to the previous analysis, I will start with a Chi-Squared Test and follow with a logistic regression models.
 
-Overall, the statistical analysis of the variables has been in line with my hypothesis. However, a major limitation of this study is the lack of extensive data on the individual level. Since the table I extracted data from was already grouped by age, the actual distribution of the sample could not be used for any t-tests. Another limitation resulting from the dataset is that only a handful of socioeconomic variables are recorded. 
+```{r, message = FALSE,echo=FALSE, error=FALSE, warning=FALSE}
 
-To conclude, although limited by the available dataset, this initial analysis validated that the claim "socioeconomic factors have an effect on child mortality rates" can be applied to Nepal.
+Pol_cols <- c("helppoor", "helpnot", "helpsick", "helpblk", "trdunion", "goveqinc", "govjobs", "govunemp", "govlazy", "govcare")
+Chisq_table <- data.frame(matrix(ncol = length(Pol_cols) + 1, nrow = 1))
+colnames(Chisq_table) <- c("", Pol_cols)
 
-A future study should attempt to capture a larger plethora of factors such as income, education, employment, community safety, and social supports and analyse their relationship with child mortality rates. Sampling should be stratified to accommodate enough subjects within each socioeconomic circumstance. It is important to have a larger array of variables in order to determine which variables are independently responsible for the variation in child mortality (one variable may become obsolete when another is taken into account). 
+Chisq_table[1,1] <- "P-Val"
+for (j in seq(1, length(Pol_cols))){
+  temp_df <- na.omit(dplyr::select(gss_data2, 'polviews', Pol_cols[j]))
+    if (nrow(temp_df) > 500){
+      pval <- chisq.test(temp_df[,1], temp_df[,2])$p.value
+      if (pval < 0.05){
+        Chisq_table[1, j+1] <- signif(pval, 2)
+      } else {
+        Chisq_table[1, j+1] <- "> 0.05"
+      }
+    } else{
+        Chisq_table[1, j+1] <- NA
+    }
+  
+}
+
+
+knitr::kable(Chisq_table, caption = "P Value of Chi Square Test Comparing Political Stance Variables and Political Orientation") %>%
+  kable_styling(latex_options="scale_down")
+
+```
+
+As one would expect, Table 5 shows that each of the variables representing a Socio-Political opinion significantly correlates with polviews. The extent of these relationships are present in Table 6. 
+
+
+
+```{r, message = FALSE,echo=FALSE, error=FALSE, warning=FALSE}
+Log_reg_table <- data.frame(matrix(ncol = length(Pol_cols) + 1, 1))
+colnames(Log_reg_table) <- c("", Pol_cols)
+
+Log_reg_table[1,1] <- "Coefficient"
+for (j in seq(1, length(Pol_cols))){
+  temp_df <- na.omit(dplyr::select(gss_data2, "polviews", Pol_cols[j]))
+  colnames(temp_df) <- c("a", "b")
+  if (nrow(temp_df) > 500){
+    pval <- chisq.test(temp_df[,1], temp_df[,2])$p.value
+    if (pval < 0.05){
+      temp_model <- polr(as.factor(a) ~ b, data = temp_df)
+      Log_reg_table[1, j+1] <- signif(as.numeric(temp_model$coefficients), 3)
+    } else {
+      Log_reg_table[1, j+1] <- "P > 0.05"
+    }
+  }
+}
+
+knitr::kable(Log_reg_table, caption = "Coefficient of Logistic Regression of Political Variables and Polviews") %>%
+  kable_styling(latex_options="scale_down")
+
+
+```
+Compared to the Altruism variables, opinions of political matters have a much larger correlation with Political Orientation (Table 5). These are visualized in plots 18-25 (see appendix):
+
+#### Helppoor, helpnot, helpsick, helpblk, trdunion. Goveqinc:
+
+For high Y values, the probability of being more right wing increase, while the opposite happens for low Y values. This is similar to what we found in the initial data exploration. Right-wing individuals are more hesitant to social welfare compared to left-wing.
+
+From this analysis we see that a 7-factor scale is indeed sufficient in representing the various political opinions of an individual. However the current system in place in the united states is mainly consistent of 2 major parties. Republican and Democratic. The following model conducts multivariate logistic regression on "binary_orientation" on the political variables of "helppoor", "helpnot", "helpsick", "helpblk", "trdunion" and "goveqinc". It is important to include all these variables within one model because it emulates a human who has an array of opinions. Furthermore, it reduces the codependency between the variables.
+
+This is the formula for the model:
+
+$log ( \frac{P_i}{1 - P_i}) = \sum_k B_{j0k} + B_{j1k} X_k$; Where X is the political variable, and the target is the log-likelihood of binary-orientation.
+
+
+```{r, message = FALSE,echo=FALSE, error=FALSE, warning=FALSE}
+
+Log_reg_table <- data.frame(matrix(ncol = 7, nrow = 1))
+
+Pol_cols <- c("helppoor", "helpnot", "helpsick", "helpblk", "trdunion", "goveqinc")
+
+pol_df <- na.omit(dplyr::select(gss_data2, "binary_orientation", Pol_cols))
+mdl <- glm(binary_orientation ~ helppoor + helpnot + helpsick + helpblk + trdunion + goveqinc, family = binomial(link = "logit"), data = pol_df)
+
+colnames(Log_reg_table) <- c("", Pol_cols)
+
+Log_reg_table[1, 1] <- "P-Val"
+
+for (i in seq(1, length(Pol_cols))){
+  Log_reg_table[1, i+1] <- as.numeric(coef(summary(mdl))[,4][Pol_cols[i]])
+}
+
+knitr::kable(Log_reg_table, caption = " P Value of Logistic Regression Model of Political Stance Variables and Voted Candidate") %>%
+  kable_styling(latex_options="scale_down")
+  
+```
+Table 7 contains the P-values of each of the coefficients in the logistic regression model. We see that none of these values are remotely close to 0. In other words, none of the opinions are sufficiently represented in a two party system when they are coupled together by one vote. However it is important to acknowledge that this may be due to lack of data.
+
+## Discussion
+
+Altruism is a key part of human behavior that has allowed us to become the dominant species on the planet. [@Article1] described in their paper that culture played a huge part in the development of altruistic attitudes within humans. Social norms and rules have been formed to promote altruistic behaviour in pursuit of the greater good rather than benefiting certain individuals. Recursively, even our genetics were molded due to these factors. This may be because people who were more assimilated to the social constructs also had an advantage when it came to reproduction. 
+
+While being such an important factor in human success, modern society is much different from prehistoric times. The rules that govern us determine the altruistic stance of society as a single entity. Depending on what the values of this entity are, individuals are able to rely on the cumulative support of the group. In other words, government policies are ultimately the deciding factor in societal altruism. 
+
+[@Article2] explored the effect of political orientation on altruism. They conducted this study while controlling for personality factors (defined by the Big 6 personality test), in order to isolate the effect of altruistic attitudes. The results showed that individuals high in altruism will endorse a left-wing ideology.  This is logical because left-wing attitudes are more agreeable to matters such as social welfare while right-wing attitudes are more individualistic. 
+
+Drawing from the two mentioned studies, I had two goals in this paper. The first was to confirm the findings of [@Article2]. and determining the extent of the relationships between altruistic attitudes and political orientation. The second was to investigate the concept of representing opinions regarding socio-political matters (i.e government policies) through a voting system. The latter task included the conclusion of whether the two-party system currently in place in the United States is sufficient. 
+
+My first hypothesis was that my findings will be similar to those mentioned in [@Article2], i.e left-wing ideologies will endorse altruism at a higher level. To add, I believed that the two-party voting system is not sufficient in representing the political attitudes of an individual.
+
+I began the initial data exploration by analysing the distribution of altruistic and political variables grouped by political orientation (“Polviews”).  The findings were aligned with my hypotheses and showed that mean scores on altruistic variables were generally higher for right-wing groups. This means that right-wing groups are, on average, less willing to help others (higher score means disagreement as defined by the values of the variables). Similarly, political variables representing the willingness towards social welfare had higher means in right wing groups.
+
+In order to probe deeper into these relationships such that conclusions can be drawn, I analysed their correlation through two statistical models; Chi-squared Test and Logistic Regression. The former was done to identify the significance between each of the categorical variables of altruism/socio-political opinion and political orientation. The latter was required to identify the extent of these relationships.
+
+I conducted these analyses in 2 parts. Starting with the relationship between altruistic attitudes and political orientation.  Aligning with my hypotheses, I found that most altruistic attitudes correlated with political orientation (excluding donating blood, loaning items and “cutahead”). This lack of correlation can be explained through the nature of the variables. For example, the act of donating blood has many other hidden factors rather than simply “altruism”. It is related to the health of the individual along with convenience. Similarly, loaning items and “cutahead” are more related to personality rather than ideology. 
+
+The logistic regression model showed that for extreme values of “Careself”, “Selffrst”, “Othshlp” and “Givhmlss”, there is a noticeable pattern related to political orientation. As hypothesized, the more conseervating an individual is, the less likely they are willing to take extremely positive altruistic stances (their probability increases for high values of “Othshlp” and “Givhmlss”). In addition, right-wing individuals are also shown to be more self orientated i.e. their probability increases for lower values of  “Careself” and “Selffrst”. To articulate, it is more probable that an individual who values self-importance over helping others is conservative in their political orientation.
+
+The latter goal of this study was to identify the effectiveness of the current political system in representing socio-political stances of individuals. Sequentially determining whether altruism is effectively implemented by society, accurate to what each individual desires. The Chi-squared test and logistic regression showed that the 7-point scale of “polviews” is highly correlated with the political variables. Aligning with the initial data exploration, conservative individuals are indeed more hesitant to social welfare than liberals.
+
+Although a 7-point political spectrum may be sufficient in representing the sociopolitical attitudes of individuals, the current system in place in the United states consists of 2 major parties. Therefore, I analysed the relationships between political stance variables and voted party within one logistic regression model. The results aligned with my hypothesis and showed that there was no significant relationship between any of the political factors and voted candidates. When all of the political variables are coupled together, none of the factors correlate with political orientation. However, this result should be taken with the stipulation that the study was conducted with limited data.
+
+To summarize my findings, the analysis was aligned with previous studies. The more conservative an individual, the less they are likely to take on altruistic stances. This makes sense because conservative ideology is defined by its individualistic nature. It puts value on the success of each person rather than the group as a whole. Furthermore, I found that while a 7-point political orientation scale could represent various stances on politics of an individual, the current 2-party system is not sufficient. Thus, aligning with my hypotheses. 
+
+However my study consisted of various weaknesses. The major issue for my analysis was related to the modelling of the 2-party system with political stance variables. No conclusion can confidently be made from this model because there was not sufficient data for reliable results. Future studies should collect data regarding various socio-political opinions, along with voted party, and investigate this further.
+
+Additionally, the survey questions asked by the GSS were not specifically designed to represent altruism. A more specific set of questions which aims to capture various altruistic attitudes will be helpful. 
+
+Finally, in order to properly replicate the study conducted by [@Article2] and mitigate the effects of hidden variables, personality factors should be included with the analysis. A potential extension of this study should include these personality factors along with other plausible effectors and calculate the variation caused by altruism solely. 
+
 
 \hfill \break \hfill \break 
 
@@ -299,99 +536,152 @@ A future study should attempt to capture a larger plethora of factors such as in
 
 \newpage
 
-# Appendix
 
-## Data Sheet
+## Appendix
 
-### Motivation. 
 
-1.	For what purpose was the dataset created? 
-The dataset was created to capture information regarding the effect of socioeconomic factors on infant mortality in Nepal.
-2.	Who created the dataset (for example, which team, research group) and on behalf of which entity (for example, company, institution, organization)?
-It was created by the Ministry of Health (Nepal).
-3.	Who funded the creation of the dataset? 
-It was funded by the Nepali Government.
+## Plots
+```{r, message = FALSE,echo=FALSE, error=FALSE, warning=FALSE}
 
-### Composition. 
+gss_altruistic <- dplyr::select(gss_data2, othshelp, givblood, givhmlss, cutahead, volchrty, loanitem, careself, peoptrbl, selffrst, helpfrds, polviews)
 
-1.	How many instances are there in total (of each type, if appropriate)?
-There are 5 instances of Mortality rates for all 16 socio-economic categories (i.e. 80 instances total).
-2.	Does the dataset contain all possible instances or is it a sample (not necessarily random) of instances from a larger set? The dataset is a summary of a sample of the population (all instances). The sample size is 8429.
-3.	What data does each instance consist of? Mortality Rate (Deaths per 1000 individuals). 
-4.	Is there a label or target associated with each instance? Yes, for example the mortality rate of 
-5.	Is any information missing from individual instances? Yes this specific data set does not contain information about individuals, rather it is a group summary based on a socio-economic demography.
-6.	Are relationships between individual instances made explicit (for example, users' movie ratings, social network links)? Yes, the individual instances are linked based on their type of grouping. For example geographical location, Education, etc.
-7.	Are there recommended data splits (for example, training, development/validation, testing)? No
-8.	Are there any errors, sources of noise, or redundancies in the dataset? Yes, some of the instances are Not available or have an asterisk or an in a parenthesis. Figures in parentheses are based on 250-499 births; an asterisk indicates that the figure is based on fewer than 250 exposed persons and has been suppressed.
-9.	Is the dataset self-contained, or does it link to or otherwise rely on external resources (for example, websites, tweets, other datasets)? It is self-contained.
-10.	Does the dataset contain data that might be considered confidential (for example, data that is protected by legal privilege or by doctor-patient confidentiality, data that includes the content of individuals' non-public communications)? No, it is summary data (not individual).
-11.	Does the dataset contain data that, if viewed directly, might be offensive, insulting, threatening, or might otherwise cause anxiety? No
+gss_altruistic <- na.omit(gss_altruistic)
 
-### People
+Altruistic_list <- list(gss_altruistic$othshelp, gss_altruistic$givblood, gss_altruistic$givhmlss, gss_altruistic$cutahead, gss_altruistic$volchrty,
+                 gss_altruistic$loanitem, gss_altruistic$careself, gss_altruistic$peoptrbl, gss_altruistic$selffrst, gss_altruistic$helpfrds)
+Altruistic_cols <- c("othshelp", "givblood", "givhmlss", "cutahead", "volchrty", "loanitem", "careself", "peoptrbl", "selffrst", "helpfrds")
 
-1.	Does the dataset identify any sub-populations (for example, by age, gender)? Yes the subpopulations are divided by socioeconomic group.
-2.	Is it possible to identify individuals (that is, one or more natural persons), either directly or indirectly (that is, in combination with other data) from the dataset? No
-3.	Does the dataset contain data that might be considered sensitive in any way (for example, data that reveals race or ethnic origins, sexual orientations, religious beliefs, political opinions or union memberships, or locations; financial or health data; biometric or genetic data; forms of government identification, such as social security numbers; criminal history)? No
-4.	Any other comments?
+count <- 1
+for (clm in Altruistic_list){
+  print(ggplot(data=gss_altruistic, aes(polviews, ..count..))  + geom_bar(aes(fill = as.factor(clm)), position = "dodge") + scale_x_discrete(guide = guide_axis(n.dodge=3)) + guides(fill=guide_legend(title=Altruistic_cols[count])) + ggtitle(paste("Plot ", count,": ", Altruistic_cols[count]," By Political Views")))
+        count <- count + 1
+  
+}
 
-### Collection process. 
+```
 
-1.	How was the data associated with each instance acquired? Was the data directly observable (for example, raw text, movie ratings), reported by subjects (for example, survey responses), or indirectly inferred/derived from other data (for example, part-of-speech tags, model-based guesses for age or language)? The data was reported by subjects.
-2.	What mechanisms or procedures were used to collect the data (for example, hardware apparatuses or sensors, manual human curation, software programs, software APIs)? It was collected through a direct interview with the subjects.
-3.	If the dataset is a sample from a larger set, what was the sampling strategy (for example, deterministic, probabilistic with specific sampling probabilities)?
-The data was collected through two-step stratified sampling. The sampling strategy was probabilistic. The first step was the allocation 253 PSU (primary sampling unit). 34 were allocated to urban areas, 219 were allocated to rural areas. Then in these areas, each subdivision was given a probability proportional to their population size (number of households). 25 Interviews were completed from each PSU probabilistically. 
-4.	Who was involved in the data collection process (for example, students, crowdworkers, contractors) and how were they compensated (for example, how much were crowdworkers paid)?
-Workers from the Nepal Ministry of Health.
-5.	Over what timeframe was the data collected? 
-This data was collected for the year 1996.
-6.	Were any ethical review processes conducted (for example, by an institutional review board)? No.
 
-### People 2
 
-1.	Did you collect the data from the individuals in question directly, or obtain it via third parties or other sources (for example, websites)?
-Obtained it through DHS.
-2.	Were the individuals in question notified about the data collection? No
-3.	Did the individuals in question consent to the collection and use of their data? The individuals are kept anonymous, so they do not need to consent to each data collection (just the initial).
-4.	If consent was obtained, were the consenting individuals provided with a mechanism to revoke their consent in the future or for certain uses? No.
-5.	Has an analysis of the potential impact of the dataset and its use on data subjects (for example, a data protection impact analysis) been conducted? No
+```{r, message = FALSE,echo=FALSE, error=FALSE, warning=FALSE}
+Altruistic_cols <- c("othshelp", "givhmlss", "volchrty", "careself", "peoptrbl", "selffrst", "helpfrds")
+count <- 1
+for (i in Altruistic_cols){
+  temp_df <- na.omit(dplyr::select(gss_data2, "polviews", i))
+  colnames(temp_df) <- c("X", "Y")
+  temp_df$Y <- as.factor(temp_df$Y)
+  wvs1 <- polr(Y ~ X, data = temp_df)
+  efs <- Effect(focal.predictors = "X", wvs1)
+  print(plot(efs, rug = FALSE, ylab = paste(i, " (probability)"), xlab = "polviews", main = paste("Plot", as.character(10 + count), ":The effect of political orientation on", i)))
+  count <- count + 1
+}
 
-### Preprocessing/cleaning/labeling. 
+```
 
-1.	Was any preprocessing/cleaning/labeling of the data done (for example, discretization or bucketing, tokenization, part-of-speech tagging, SIFT feature extraction, removal of instances, processing of missing values)? Yes, the initial dataset was transposed to make the rows columns as they represented a specific grouping.
-2.	Was the "raw" data saved in addition to the preprocessed/cleaned/labeled data (for example, to support unanticipated future uses)? Yes: raw_data.csv
-3.	Is the software that was used to preprocess/clean/label the data available? Script/clean_data.r
 
-### Uses. 
+```{r, message = FALSE,echo=FALSE, error=FALSE, warning=FALSE}
+Pol_cols <- c("helppoor", "helpnot", "helpsick", "helpblk", "trdunion", "goveqinc", "govjobs", "govunemp")
+count <- 1
+for (i in Pol_cols){
+  temp_df <- na.omit(dplyr::select(gss_data2, "polviews", i))
+  colnames(temp_df) <- c("X", "Y")
+  temp_df$Y <- as.factor(temp_df$Y)
+  wvs1 <- polr(Y ~ X, data = temp_df)
+  efs <- Effect(focal.predictors = "X", wvs1)
+  print(plot(efs, rug = FALSE, ylab = paste(i, " (probability)"), xlab = "polviews", main = paste("Plot", as.character(17 + count), ":The effect of political orientation on", i)))
+  count <- count + 1
+}
+```
 
-1.	Has the dataset been used for any tasks already? It was used to analyse the difference in mortality rates between different socioeconomic groups.
-2.	Is there a repository that links to any or all papers or systems that use the dataset? No
-3.	What (other) tasks could the dataset be used for?
+## Datasheet
+
+#### Motivation
+
+1. For what purpose was the dataset created? 
+The dataset was created to capture information regarding the social, political and cultural opinions of the American people.
+2. Who created the dataset (for example, which team, research group) and on behalf of which entity (for example, company, institution, organization)?
+It was created by the NORC
+3. Who funded the creation of the dataset? 
+It was funded by the University of Chicago
+
+
+#### Composition
+
+1. How many instances are there in total (of each type, if appropriate)?
+There are 64815 instances of each type
+2. Does the dataset contain all possible instances or is it a sample (not necessarily random) of instances from a larger set? The dataset is a summary of a sample of the population (all instances). 
+3. What data does each instance consist of? The answer on a specific survey question. 
+4. Is there a label or target associated with each instance? Yes 
+5. Is any information missing from individual instances? No
+6. Are relationships between individual instances made explicit (for example, users' movie ratings, social network links)? Yes
+7. Are there recommended data splits (for example, training, development/validation, testing)? No
+8. Are there any errors, sources of noise, or redundancies in the dataset? Yes, some of the instances are Not available i.e contain null values
+9. Is the dataset self-contained, or does it link to or otherwise rely on external resources (for example, websites, tweets, other datasets)? It is self-contained.
+10. Does the dataset contain data that might be considered confidential (for example, data that is protected by legal privilege or by doctor-patient confidentiality, data that includes the content of individuals' non-public communications)? No it is anonymous.
+11. Does the dataset contain data that, if viewed directly, might be offensive, insulting, threatening, or might otherwise cause anxiety? No
+
+#### People
+
+1. Does the dataset identify any sub-populations (for example, by age, gender)? Yes, information regarding demographics is collected and can be used for grouping.
+2. Is it possible to identify individuals (that is, one or more natural persons), either directly or indirectly (that is, in combination with other data) from the dataset? No
+3. Does the dataset contain data that might be considered sensitive in any way (for example, data that reveals race or ethnic origins, sexual orientations, religious beliefs, political opinions or union memberships, or locations; financial or health data; biometric or genetic data; forms of government identification, such as social security numbers; criminal history)? No
+4. Any other comments?
+
+#### Collection process 
+
+1. How was the data associated with each instance acquired? Was the data directly observable (for example, raw text, movie ratings), reported by subjects (for example, survey responses), or indirectly inferred/derived from other data (for example, part-of-speech tags, model-based guesses for age or language)? The data was reported by subjects.
+2. What mechanisms or procedures were used to collect the data (for example, hardware apparatuses or sensors, manual human curation, software programs, software APIs)? It was collected through a direct interview with the subjects.
+3. If the dataset is a sample from a larger set, what was the sampling strategy (for example, deterministic, probabilistic with specific sampling probabilities)?
+The data was collected through two-step stratified sampling. The sampling strategy was probabilistic. The first step was the allocation of area units which were given probabilities based on their population. Then an individual was selected randomly from the chosen area. 
+4. Who was involved in the data collection process (for example, students, crowdworkers, contractors) and how were they compensated (for example, how much were crowdworkers paid)?
+Workers from the NORC.
+5. Over what timeframe was the data collected? 
+This data was collected from the year 1972 to 2016.
+6. Were any ethical review processes conducted (for example, by an institutional review board)? No.
+
+#### People 2
+
+1. Did you collect the data from the individuals in question directly, or obtain it via third parties or other sources (for example, websites)?
+Obtained it through GSS Website.
+2. Were the individuals in question notified about the data collection? No
+3. Did the individuals in question consent to the collection and use of their data? The individuals are kept anonymous, so they do not need to consent to each data collection (just the initial).
+4. If consent was obtained, were the consenting individuals provided with a mechanism to revoke their consent in the future or for certain uses? No.
+5. Has an analysis of the potential impact of the dataset and its use on data subjects (for example, a data protection impact analysis) been conducted? No
+
+#### Preprocessing/cleaning/labeling
+
+1. Was any preprocessing/cleaning/labeling of the data done (for example, discretization or bucketing, tokenization, part-of-speech tagging, SIFT feature extraction, removal of instances, processing of missing values)? Yes, the answers on the survey questions were converted to a numerical scale.
+2. Was the "raw" data saved in addition to the preprocessed/cleaned/labeled data (for example, to support unanticipated future uses)? No
+3. Is the software that was used to preprocess/clean/label the data available? No
+
+#### Uses
+
+1. Has the dataset been used for any tasks already? It was used to analyse the different effects of Social, Political and Cultural Attitudes.
+2. Is there a repository that links to any or all papers or systems that use the dataset? No
+3. What (other) tasks could the dataset be used for?
 None
-4.	Is there anything about the composition of the dataset or the way it was collected and preprocessed/cleaned/labeled that might impact future uses? No
-5.	Are there tasks for which the dataset should not be used? No
-Distribution. 
+4. Is there anything about the composition of the dataset or the way it was collected and preprocessed/cleaned/labeled that might impact future uses? No
+5. Are there tasks for which the dataset should not be used? No
 
-### People 3
+#### Distribution
 
-1.	Will the dataset be distributed to third parties outside of the entity (for example, company, institution, organization) on behalf of which the dataset was created? Yes, it can be accessed by anyone.
-2.	How will the dataset be distributed (for example, tarball on website, API, GitHub)? It is available online at DHS.
-3.	When will the dataset be distributed?
+1. Will the dataset be distributed to third parties outside of the entity (for example, company, institution, organization) on behalf of which the dataset was created? Yes, it can be accessed by anyone.
+2. How will the dataset be distributed (for example, tarball on website, API, GitHub)? It is available online at GSS.
+3. When will the dataset be distributed?
 It has already been distributed.
-4.	Will the dataset be distributed under a copyright or other intellectual property (IP) license, and/or under applicable terms of use (ToU)? No
-5.	Have any third parties imposed IP-based or other restrictions on the data associated with the instances? No
-6.	Do any export controls or other regulatory restrictions apply to the dataset or to individual instances? No
+4. Will the dataset be distributed under a copyright or other intellectual property (IP) license, and/or under applicable terms of use (ToU)? No
+5. Have any third parties imposed IP-based or other restrictions on the data associated with the instances? No
+6. Do any export controls or other regulatory restrictions apply to the dataset or to individual instances? No
 
-### Maintenance. 
+#### Maintenance 
 
-1.	Who will be supporting/hosting/maintaining the dataset?
+1. Who will be supporting/hosting/maintaining the dataset?
 No one
-2.	How can the owner/curator/manager of the dataset be contacted (for example, email address)?
-You must contact the ministry of health (Nepal).
-3.	Is there an erratum? No
-4.	Will the dataset be updated (for example, to correct labeling errors, add new instances, delete instances)? No
-5.	If the dataset relates to people, are there applicable limits on the retention of the data associated with the instances (for example, were the individuals in question told that their data would be retained for a fixed period of time and then deleted)? No
-6.	Will older versions of the dataset continue to be supported/hosted/maintained? N/A
-7.	If others want to extend/augment/build on/contribute to the dataset, is there a mechanism for them to do so? No
-
+2. How can the owner/curator/manager of the dataset be contacted (for example, email address)?
+You must contact the NORC.
+3. Is there an erratum? No
+4. Will the dataset be updated (for example, to correct labeling errors, add new instances, delete instances)? No
+5. If the dataset relates to people, are there applicable limits on the retention of the data associated with the instances (for example, were the individuals in question told that their data would be retained for a fixed period of time and then deleted)? No
+6. Will older versions of the dataset continue to be supported/hosted/maintained? N/A
+7. If others want to extend/augment/build on/contribute to the dataset, is there a mechanism for them to do so? No
 
 
