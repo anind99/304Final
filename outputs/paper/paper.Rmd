@@ -339,8 +339,11 @@ knitr::kable(Chisq_table, caption = "P Value of Chi Square Test Comparing Altrui
 
 From Table 5:
 
-    * Helping others (helpfrds, peoptrbl), giving to the homeless, volunteering in charity, self-importance (selffrst, careself) are all concepts that have a significant relationship with political orientation.
-    * Donating blood, loaning items, and allowing others to cut ahead in line do not have a significant relationship.
+    * Helping others (helpfrds, peoptrbl), giving to the homeless,
+      volunteering in charity, self-importance (selffrst, careself) 
+      are all concepts that have a significant relationship with political orientation.
+    * Donating blood, loaning items, and allowing others to cut ahead in line 
+      do not have a significant relationship.
 
 As I hypothesized and also observed in the initial data observation, most altruistic attitudes do correlate with political orientation. A potential reason that 3 of the variables are not related may be because these variables aren't derived from ideology but rather personal circumstance. For example, the amount times an individual donates blood in a year depends on their health and general convenience factors. 
 
@@ -528,71 +531,13 @@ Additionally, the survey questions asked by the GSS were not specifically design
 Finally, in order to properly replicate the study conducted by [@Article2] and mitigate the effects of hidden variables, personality factors should be included with the analysis. A potential extension of this study should include these personality factors along with other plausible effectors and calculate the variation caused by altruism solely. 
 
 
-\hfill \break \hfill \break 
-
 ## Bibliography
 
 <div id="refs"></div>
 
-\newpage
-
-
 ## Appendix
 
-
-## Plots
-```{r, message = FALSE,echo=FALSE, error=FALSE, warning=FALSE}
-
-gss_altruistic <- dplyr::select(gss_data2, othshelp, givblood, givhmlss, cutahead, volchrty, loanitem, careself, peoptrbl, selffrst, helpfrds, polviews)
-
-gss_altruistic <- na.omit(gss_altruistic)
-
-Altruistic_list <- list(gss_altruistic$othshelp, gss_altruistic$givblood, gss_altruistic$givhmlss, gss_altruistic$cutahead, gss_altruistic$volchrty,
-                 gss_altruistic$loanitem, gss_altruistic$careself, gss_altruistic$peoptrbl, gss_altruistic$selffrst, gss_altruistic$helpfrds)
-Altruistic_cols <- c("othshelp", "givblood", "givhmlss", "cutahead", "volchrty", "loanitem", "careself", "peoptrbl", "selffrst", "helpfrds")
-
-count <- 1
-for (clm in Altruistic_list){
-  print(ggplot(data=gss_altruistic, aes(polviews, ..count..))  + geom_bar(aes(fill = as.factor(clm)), position = "dodge") + scale_x_discrete(guide = guide_axis(n.dodge=3)) + guides(fill=guide_legend(title=Altruistic_cols[count])) + ggtitle(paste("Plot ", count,": ", Altruistic_cols[count]," By Political Views")))
-        count <- count + 1
-  
-}
-
-```
-
-
-
-```{r, message = FALSE,echo=FALSE, error=FALSE, warning=FALSE}
-Altruistic_cols <- c("othshelp", "givhmlss", "volchrty", "careself", "peoptrbl", "selffrst", "helpfrds")
-count <- 1
-for (i in Altruistic_cols){
-  temp_df <- na.omit(dplyr::select(gss_data2, "polviews", i))
-  colnames(temp_df) <- c("X", "Y")
-  temp_df$Y <- as.factor(temp_df$Y)
-  wvs1 <- polr(Y ~ X, data = temp_df)
-  efs <- Effect(focal.predictors = "X", wvs1)
-  print(plot(efs, rug = FALSE, ylab = paste(i, " (probability)"), xlab = "polviews", main = paste("Plot", as.character(10 + count), ":The effect of political orientation on", i)))
-  count <- count + 1
-}
-
-```
-
-
-```{r, message = FALSE,echo=FALSE, error=FALSE, warning=FALSE}
-Pol_cols <- c("helppoor", "helpnot", "helpsick", "helpblk", "trdunion", "goveqinc", "govjobs", "govunemp")
-count <- 1
-for (i in Pol_cols){
-  temp_df <- na.omit(dplyr::select(gss_data2, "polviews", i))
-  colnames(temp_df) <- c("X", "Y")
-  temp_df$Y <- as.factor(temp_df$Y)
-  wvs1 <- polr(Y ~ X, data = temp_df)
-  efs <- Effect(focal.predictors = "X", wvs1)
-  print(plot(efs, rug = FALSE, ylab = paste(i, " (probability)"), xlab = "polviews", main = paste("Plot", as.character(17 + count), ":The effect of political orientation on", i)))
-  count <- count + 1
-}
-```
-
-## Datasheet
+### Datasheet
 
 #### Motivation
 
@@ -684,4 +629,57 @@ You must contact the NORC.
 6. Will older versions of the dataset continue to be supported/hosted/maintained? N/A
 7. If others want to extend/augment/build on/contribute to the dataset, is there a mechanism for them to do so? No
 
+
+### Plots
+
+```{r, message = FALSE,echo=FALSE, error=FALSE, warning=FALSE}
+
+gss_altruistic <- dplyr::select(gss_data2, othshelp, givblood, givhmlss, cutahead, volchrty, loanitem, careself, peoptrbl, selffrst, helpfrds, polviews)
+
+gss_altruistic <- na.omit(gss_altruistic)
+
+Altruistic_list <- list(gss_altruistic$othshelp, gss_altruistic$givblood, gss_altruistic$givhmlss, gss_altruistic$cutahead, gss_altruistic$volchrty,
+                 gss_altruistic$loanitem, gss_altruistic$careself, gss_altruistic$peoptrbl, gss_altruistic$selffrst, gss_altruistic$helpfrds)
+Altruistic_cols <- c("othshelp", "givblood", "givhmlss", "cutahead", "volchrty", "loanitem", "careself", "peoptrbl", "selffrst", "helpfrds")
+
+count <- 1
+for (clm in Altruistic_list){
+  print(ggplot(data=gss_altruistic, aes(polviews, ..count..))  + geom_bar(aes(fill = as.factor(clm)), position = "dodge") + scale_x_discrete(guide = guide_axis(n.dodge=3)) + guides(fill=guide_legend(title=Altruistic_cols[count])) + ggtitle(paste("Plot ", count,": ", Altruistic_cols[count]," By Political Views")))
+        count <- count + 1
+  
+}
+
+```
+
+
+
+```{r, message = FALSE,echo=FALSE, error=FALSE, warning=FALSE}
+Altruistic_cols <- c("othshelp", "givhmlss", "volchrty", "careself", "peoptrbl", "selffrst", "helpfrds")
+count <- 1
+for (i in Altruistic_cols){
+  temp_df <- na.omit(dplyr::select(gss_data2, "polviews", i))
+  colnames(temp_df) <- c("X", "Y")
+  temp_df$Y <- as.factor(temp_df$Y)
+  wvs1 <- polr(Y ~ X, data = temp_df)
+  efs <- Effect(focal.predictors = "X", wvs1)
+  print(plot(efs, rug = FALSE, ylab = paste(i, " (probability)"), xlab = "polviews", main = paste("Plot", as.character(10 + count), ":The effect of political orientation on", i)))
+  count <- count + 1
+}
+
+```
+
+
+```{r, message = FALSE,echo=FALSE, error=FALSE, warning=FALSE}
+Pol_cols <- c("helppoor", "helpnot", "helpsick", "helpblk", "trdunion", "goveqinc", "govjobs", "govunemp")
+count <- 1
+for (i in Pol_cols){
+  temp_df <- na.omit(dplyr::select(gss_data2, "polviews", i))
+  colnames(temp_df) <- c("X", "Y")
+  temp_df$Y <- as.factor(temp_df$Y)
+  wvs1 <- polr(Y ~ X, data = temp_df)
+  efs <- Effect(focal.predictors = "X", wvs1)
+  print(plot(efs, rug = FALSE, ylab = paste(i, " (probability)"), xlab = "polviews", main = paste("Plot", as.character(17 + count), ":The effect of political orientation on", i)))
+  count <- count + 1
+}
+```
 

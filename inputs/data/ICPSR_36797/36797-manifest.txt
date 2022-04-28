@@ -1,0 +1,52 @@
+File Manifest for ICPSR 36797
+
+Smith, Tom W., Michael Hout, and Peter V. Marsden. General Social Survey,
+1972-2016 [Cumulative File]. ICPSR36797-v1. Chicago, IL: National Opinion
+Research Center/Ann Arbor, MI: Inter-university Consortium for Political
+and Social Research [distributors], 2017-11-14.
+http://doi.org/10.3886/ICPSR36797.v1
+
+
+Study-level Documentation
+
+    Filename                            Record  Record    Var.    Date        MD5
+                                        Length  Count     Count   Updated     Checksum
+
+    36797-descriptioncitation.pdf       -       -         -       2018-07-13  -
+
+    36797-related_literature.txt        -       -         -       daily       -
+
+    36797-manifest.txt                  -       -         -       daily       -
+
+
+DS0001 General Social Survey, 1972-2016 [Cumulative File]
+
+    Filename                            Record  Record    Var.    Date        MD5
+                                        Length  Count     Count   Updated     Checksum
+
+    36797-0001-Codebook.pdf             -       -         -       2017-11-14  ece4c9a0132ed56f0c11469af583099e
+
+    36797-0001-Data.dta                 -       62,466    5897    2017-11-14  cbede59e77f3f004b39b7a1295bac3c2
+
+    36797-0001-Data.rda                 -       62,466    5897    2017-11-14  77394fdf46e51fdb92555e5fc94dda28
+
+    36797-0001-Data.sav                 -       62,466    5897    2017-11-14  8580a68d33e13e3008cc02bf8aaf64d3
+
+    36797-0001-Data.stc                 -       62,466    5897    2017-11-14  ca7ed802bf0385865d4241493ffadc31
+
+    36797-0001-Data.tsv                 -       62,466    5897    2017-11-14  fc74c1804fed20731d87ecc61e3a4c71
+
+    36797-0001-Data.txt                 8116    62,466    5897    2017-11-14  209a4e518f4106f323f44a6dcd3a6de2
+
+    36797-0001-Setup.dct                -       -         -       2017-11-14  a4e5cb4bc7a2e951a421de40d648b140
+
+    36797-0001-Setup.do                 -       -         -       2017-11-14  2c2d84075cc5455ee2702bb8a0d569c7
+
+    36797-0001-Setup.sas                -       -         -       2017-11-14  d3b827297783dd3a881ce74c0fd0b6d6
+
+    36797-0001-Setup.sps                -       -         -       2017-11-14  3b356deca1fed809f5b47ec76f7e3e13
+
+    36797-0001-Supplemental_syntax.do   -       -         -       2017-11-14  2f61944e8f5d274c0369ddfd6eb57929
+
+    36797-0001-Supplemental_syntax.sas  -       -         -       2017-11-14  2e2a20dc55364cf77b8fc8959fe55fe3
+
