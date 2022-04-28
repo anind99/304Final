@@ -305,7 +305,7 @@ Both givhmlss and helpfrd are more right skew for more left leaning groups. This
 
 Initially looking at the relationships provided us an initial idea of their relationships. Nevertheless, in order to delve into these relationships more deeply, I will now be analyzing them quantitatively using statistically models.
 
-## Results
+## Model & Results
 
 My analysis will be conducted in 2 parts, addressing both of the research goals driving this study. The first goal is to determine whether left-wing political ideologists are more altruistic than right-wing. The second, to investigate the correlation between stances on different socio-political matters and political views. This latter investigation will include the conclusion which identifies the effectiveness of a 2-party system in representing the political opinions of an individual.
 
